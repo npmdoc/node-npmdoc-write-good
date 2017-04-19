@@ -1,0 +1,200 @@
+<div class="apidocDiv">
+<style>
+/*csslint
+*/
+.apidocDiv {
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.apidocDiv a[href] {
+    color: #33f;
+    font-weight: bold;
+    text-decoration: none;
+}
+.apidocDiv a[href]:hover {
+    text-decoration: underline;
+}
+.apidocCodeCommentSpan {
+    background: #bbf;
+    color: #000;
+    display: block;
+}
+.apidocCodeKeywordSpan {
+    color: #d00;
+    font-weight: bold;
+}
+.apidocCodePre {
+    background: #eef;
+    border: 1px solid;
+    color: #777;
+    padding: 5px;
+    white-space: pre-wrap;
+}
+.apidocFooterDiv {
+    margin-top: 20px;
+    text-align: center;
+}
+.apidocModuleLi {
+    margin-top: 10px;
+}
+.apidocSectionDiv {
+    border-top: 1px solid;
+    margin-top: 20px;
+}
+.apidocSignatureSpan {
+    color: #777;
+    font-weight: bold;
+}
+</style>
+<h1>api documentation for
+    <a
+
+        href="https://github.com/btford/write-good#readme"
+
+    >write-good (v0.11.0)</a>
+</h1>
+<h4>Naive linter for English prose</h4>
+<div class="apidocSectionDiv"><a
+    href="#apidoc.tableOfContents"
+    id="apidoc.tableOfContents"
+><h1>table of contents</h1></a><ol>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.write-good">module write-good</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.write-good.write-good">
+            function <span class="apidocSignatureSpan"></span>write-good
+            <span class="apidocSignatureSpan">(text, opts)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.write-good.annotate">
+            function <span class="apidocSignatureSpan">write-good.</span>annotate
+            <span class="apidocSignatureSpan">(contents, suggestions, parse)</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+</ol></div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.write-good" id="apidoc.module.write-good">module write-good</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.write-good.write-good" id="apidoc.element.write-good.write-good">
+        function <span class="apidocSignatureSpan"></span>write-good
+        <span class="apidocSignatureSpan">(text, opts)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">write-good = function (text, opts) {
+  opts = opts ? opts : {};
+  var finalOpts = {};
+  opts = assign({}, disabledChecks, opts);
+  Object.keys(opts).map(function(optKey) {
+    if(optKey !== &#x27;checks&#x27;) {
+      finalOpts[optKey] = opts[optKey];
+    }
+  });
+
+  var finalChecks = opts.checks || defaultChecks;
+
+  var suggestions = [];
+  Object.keys(finalChecks).forEach(function (checkName) {
+    if (finalOpts[checkName] !== false) {
+      suggestions = suggestions.concat(finalChecks[checkName].fn(text).
+                          map(reasonable(finalChecks[checkName].explanation)));
+    }
+  });
+
+  return dedup(suggestions).sort(function (a, b) {
+    return a.index &#x3c; b.index ? -1 : 1;
+  });
+
+  function reasonable (reason) {
+    return function (suggestion) {
+      suggestion.reason = &#x27;&#x22;&#x27; +
+          text.substr(suggestion.index, suggestion.offset) +
+          &#x27;&#x22; &#x27; + reason;
+      return suggestion;
+    };
+  }
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.write-good.annotate" id="apidoc.element.write-good.annotate">
+        function <span class="apidocSignatureSpan">write-good.</span>annotate
+        <span class="apidocSignatureSpan">(contents, suggestions, parse)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">annotate = function (contents, suggestions, parse) {
+
+  var lines = contents.split(&#x27;\n&#x27;);
+
+  return suggestions.map(function (suggestion) {
+    var lineColumn = findLineColumn(suggestion.index);
+
+    var fix = 0;
+
+    if (lineColumn.col &#x3e; 25) {
+      fix = lineColumn.col - 25;
+    }
+
+    if(parse){
+      return {
+        reason: suggestion.reason,
+        line: lineColumn.line,
+        col: lineColumn.col,
+      }
+    }
+    var lineSegment = lines[lineColumn.line - 1].substr(fix, 80);
+
+    return [
+      lineSegment,
+      repeatChar(&#x27; &#x27;, lineColumn.col - fix) + repeatChar(&#x27;^&#x27;, suggestion.offset),
+      suggestion.reason + &#x27; on line &#x27; + lineColumn.line + &#x27; at column &#x27; + lineColumn.col
+    ].join(&#x27;\n&#x27;);
+  })
+
+  function findLineColumn (index) {
+    var line = contents.substr(0, index).split(&#x27;\n&#x27;).length;
+
+
+    var startOfLineIndex = (function () {
+      var x = lines.slice(0);
+      x.splice(line - 1);
+      return x.join(&#x27;\n&#x27;).length + (x.length &#x3e; 0);
+    }());
+
+    var col = index - startOfLineIndex;
+
+    return {
+      line: line,
+      col: col
+    };
+  }
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocFooterDiv">
+    [ this document was created with
+    <a href="https://github.com/kaizhu256/node-utility2" target="_blank">utility2</a>
+    ]
+</div>
+</div>
